@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Gpumining{% endblock %}
+{% block content %}
+
+<div class="input-group">
+    <input type="text" id="powercost" value="5">
+    <div class="input-group-append">
+        <span class="input-group-text">Power Cost (TWD/kwh)</span>
+    </div>
+</div>
+
+<div id="gpu-list">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col" id="model">Model</th>
+                <th scope="col" id="algo">Algorithm</th>
+                <th scope="col" id="power">Power (W)</th>
+                <th scope="col" id="profit">Est. Profit (TWD/day)</th>
+                <th scope="col" id="price">GPU Price (TWD)</th>
+                <th scope="col" id="quantity">Quantity (PCS)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gpu in gpus %}
+            <tr id="{{ gpu.id }}">
+                <td id="{{ gpu.model }}" class="align-middle">{{ gpu.model }}</td>
+                <td class="align-middle">{{ gpu.algo }}</td>
+                <td class="align-middle">{{ gpu.power }}</td>
+                <td class="align-middle">{{ gpu.profit}}</td>
+                <td class="align-middle">{{ gpu.price }}</td>
+                <td>
+                    <select>
+                        <option>0</option>
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                    </select>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<table class="table table-hover">
+    <thead>
+        <tr class="table-success">
+            <th scope="col">Profit (TWD/day)</th>
+            <th scope="col">Power Cost (TWD/day)</th>
+            <th scope="col">Net Profit (TWD/day)</th>
+            <th scope="col">Price (TWD)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr id="miningdash">
+            <td class="align-middle">0</td>
+            <td class="align-middle">0</td>
+            <td class="align-middle">0</td>
+            <td class="align-middle">0</td>
+        </tr>
+    </tbody>
+</table>
+<button type="button" class="btn btn-primary">Submit Order</button>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    $(document).ready(function () {
+
+        var myFunction = function () {
+            var pp = 2;
+            $("div#gpu-list").each(function () {
+                pp = 2;
+            });
+
+            var gpu_power = parseFloat($("div#gpu-list #1 td.align-middle:eq(2)").text());
+            var gpu_profit = parseFloat($("div#gpu-list #1 td.align-middle:eq(3)").text());
+            var gpu_price = parseFloat($("div#gpu-list #1 td.align-middle:eq(4)").text());
+            var gpu_quty = parseFloat($("div#gpu-list #1 :selected").text());
+            var power_cost = parseFloat($("input#powercost").val())
+
+            console.log(power_cost);
+
+            //day profit
+            var day_profit = gpu_profit * gpu_quty
+            $("tr#miningdash td.align-middle:eq(0)").html(day_profit.toFixed(1));
+            //day cost 
+            var day_cost = gpu_power * gpu_quty / 1000 * power_cost * 24
+            $("tr#miningdash td.align-middle:eq(1)").html(day_cost.toFixed(1));
+            //net cost
+            $("tr#miningdash td.align-middle:eq(2)").html((day_profit - day_cost).toFixed(1))
+            //price
+            $("tr#miningdash td.align-middle:eq(3)").html((gpu_quty * gpu_price))
+
+        };
+        $("tr select").change(myFunction)
+        $("input#powercost").change(myFunction)
+    });
+</script>
+{% endblock %}

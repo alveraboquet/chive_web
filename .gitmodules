@@ -1,0 +1,4 @@
+[submodule "vanilla"]
+    path = vanilla
+    url = git@github.com/hibc25311/vanilla.git
+    branch = master

@@ -1,0 +1,54 @@
+# for chive_web project
+version: '3.9'
+services:
+  # vanilla
+  vanilla-db:
+    restart: always
+    image: postgres:13-alpine
+    volumes:
+      - vanilla-pg-backup-data:/var/lib/postgresql/data
+    env_file:
+      - ./env/.dev
+      - ./env/.vanilla_conf
+    networks:
+      - chive_web
+    ports:
+      - "5432:5432"
+
+  vanilla-redis:
+    restart: always
+    image: redis:6.2.4-alpine
+    volumes:
+      - redis-data:/data
+    networks:
+      - chive_web
+    ports:
+      - "6379:6379"
+      
+  vanilla:
+    image: chive_web_vanilla
+    restart: always
+    build: ./vanilla
+    depends_on:
+        vanilla-db:
+            condition: service_started
+        vanilla-redis:
+            condition: service_started
+    networks:
+      - chive_web
+    env_file:
+      - ./env/.dev
+      - ./env/.vanilla_conf
+    volumes:
+      - ./vanilla:/app/
+    ports:
+      -  "8000:8000"
+    command: >
+      bash -c "python manage.py runserver 0.0.0.0:8000"
+networks:
+  chive_web:
+    driver: bridge
+
+volumes:
+  vanilla-pg-backup-data:  # vanilla db
+  redis-data:  # vanilla cache
